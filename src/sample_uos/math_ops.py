@@ -56,7 +56,10 @@ class DivideOutput(BaseModel):
     result: float = Field(description="Result of division")
 
 
-@unit_operation(description="Divide two numbers")
+@unit_operation(
+    description="Divide two numbers",
+    error_codes=["DIVISION_BY_ZERO"],
+)
 def divide(input: DivideInput) -> DivideOutput | Error:
     """Divide numerator by denominator. Returns Error if denominator is zero."""
     if input.denominator == 0:

@@ -160,11 +160,9 @@ def log_error(input: ErrorInfoInput) -> ErrorInfoOutput:
 
 @uostore_type()
 class EmergencyInput(BaseModel):
-    """Input for emergency stop."""
+    """Input for emergency stop safety action."""
 
-    error_code: str = Field(default="UNKNOWN", description="The error code")
-    error_message: str = Field(default="", description="The error message")
-    block_id: str = Field(default="", description="Block where the error occurred")
+    pass
 
 
 @uostore_type()
@@ -176,9 +174,10 @@ class EmergencyOutput(BaseModel):
 
 @unit_operation(description="Emergency stop - halt all operations")
 def emergency_stop(input: EmergencyInput) -> EmergencyOutput:
-    """Emergency stop handler. Always succeeds."""
-    print(
-        f"[EMERGENCY STOP] Code: {input.error_code}, "
-        f"Message: {input.error_message}, Block: {input.block_id}"
-    )
+    """Emergency stop handler — performs safety actions.
+
+    Error details (code, message, block) are logged and stored in the
+    database by the emergency_stop_fn callback, not by this UO.
+    """
+    print("[EMERGENCY STOP] Halting all operations")
     return EmergencyOutput(halted=True)

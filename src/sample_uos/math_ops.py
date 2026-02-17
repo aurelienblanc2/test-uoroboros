@@ -2,9 +2,10 @@
 
 from pydantic import BaseModel, Field
 
-from uostore import Error, unit_operation
+from uostore import unit_operation, uostore_type
 
 
+@uostore_type()
 class AddInput(BaseModel):
     """Input for addition."""
 
@@ -12,18 +13,20 @@ class AddInput(BaseModel):
     b: float = Field(description="Second number")
 
 
-class AddOutput(BaseModel):
-    """Output for addition."""
+@uostore_type()
+class ResultFloat(BaseModel):
+    """Single float"""
 
-    result: float = Field(description="Sum of a and b")
+    result: float = Field(description="result")
 
 
 @unit_operation(description="Add two numbers together")
-def add(input: AddInput) -> AddOutput | Error:
+def add(input: AddInput) -> ResultFloat:
     """Compute the sum of two numbers."""
-    return AddOutput(result=input.a + input.b)
+    return ResultFloat(result=input.a + input.b)
 
 
+@uostore_type()
 class MultiplyInput(BaseModel):
     """Input for multiplication."""
 
@@ -31,18 +34,13 @@ class MultiplyInput(BaseModel):
     b: float = Field(description="Second number")
 
 
-class MultiplyOutput(BaseModel):
-    """Output for multiplication."""
-
-    result: float = Field(description="Product of a and b")
-
-
 @unit_operation(description="Multiply two numbers")
-def multiply(input: MultiplyInput) -> MultiplyOutput | Error:
+def multiply(input: MultiplyInput) -> ResultFloat:
     """Compute the product of two numbers."""
-    return MultiplyOutput(result=input.a * input.b)
+    return ResultFloat(result=input.a * input.b)
 
 
+@uostore_type()
 class DivideInput(BaseModel):
     """Input for division."""
 
@@ -50,26 +48,25 @@ class DivideInput(BaseModel):
     denominator: float = Field(description="Number to divide by")
 
 
-class DivideOutput(BaseModel):
-    """Output for division."""
+@uostore_type(error_code="DIVISION_BY_ZERO", message="Cannot divide by zero")
+class DivisionByZeroError(BaseModel):
+    """Error when dividing by zero."""
 
-    result: float = Field(description="Result of division")
+    pass
 
 
-@unit_operation(
-    description="Divide two numbers",
-    error_codes=["DIVISION_BY_ZERO"],
-)
-def divide(input: DivideInput) -> DivideOutput | Error:
+@unit_operation(description="Divide two numbers")
+def divide(input: DivideInput) -> ResultFloat | DivisionByZeroError:
     """Divide numerator by denominator. Returns Error if denominator is zero."""
     if input.denominator == 0:
-        return Error(code="DIVISION_BY_ZERO", message="Cannot divide by zero")
-    return DivideOutput(result=input.numerator / input.denominator)
+        return DivisionByZeroError()
+    return ResultFloat(result=input.numerator / input.denominator)
 
 
 # === Advanced UOs for comprehensive error handling demonstration ===
 
 
+@uostore_type()
 class ValidateInput(BaseModel):
     """Input for validation UO."""
 
@@ -78,6 +75,7 @@ class ValidateInput(BaseModel):
     max_value: float = Field(default=100, description="Maximum allowed value")
 
 
+@uostore_type()
 class ValidateOutput(BaseModel):
     """Output for validation UO."""
 
@@ -85,43 +83,48 @@ class ValidateOutput(BaseModel):
     is_clamped: bool = Field(description="Whether value was clamped to range")
 
 
-@unit_operation(
-    description="Validate and clamp a value to a range",
-    error_codes=["INVALID_INPUT", "RANGE_ERROR", "OVERFLOW"],
-)
-def validate_range(input: ValidateInput) -> ValidateOutput | Error:
+@uostore_type(error_code="INVALID_INPUT", message="Value must be a finite number")
+class InvalidInputError(BaseModel):
+    """Error for invalid input values."""
+
+    received: str = Field(default="", description="The received value")
+
+
+@uostore_type(error_code="RANGE_ERROR", message="Range parameters are invalid")
+class RangeError(BaseModel):
+    """Error for invalid range parameters."""
+
+    min: float = Field(default=0, description="Min value")
+    max: float = Field(default=0, description="Max value")
+
+
+@uostore_type(error_code="OVERFLOW", message="Value exceeds safe range")
+class OverflowError(BaseModel):
+    """Error for overflow values."""
+
+    value: str = Field(default="", description="The overflow value")
+
+
+@unit_operation(description="Validate and clamp a value to a range")
+def validate_range(
+    input: ValidateInput,
+) -> ValidateOutput | InvalidInputError | RangeError | OverflowError:
     """Validate value is within range. Multiple error codes for different failures."""
     import math
 
     # Check for NaN (truly invalid)
     if math.isnan(input.value):
-        return Error(
-            code="INVALID_INPUT",
-            message="Value must be a finite number",
-            details={"received": str(input.value)},
-        )
+        return InvalidInputError(received=str(input.value))
 
     # Check for infinity (overflow)
     if math.isinf(input.value):
-        return Error(
-            code="OVERFLOW",
-            message="Value is infinite (overflow)",
-            details={"value": str(input.value)},
-        )
+        return OverflowError(value=str(input.value))
 
     if input.min_value > input.max_value:
-        return Error(
-            code="RANGE_ERROR",
-            message="min_value cannot be greater than max_value",
-            details={"min": input.min_value, "max": input.max_value},
-        )
+        return RangeError(min=input.min_value, max=input.max_value)
 
     if abs(input.value) > 1e300:
-        return Error(
-            code="OVERFLOW",
-            message="Value exceeds safe range",
-            details={"value": input.value},
-        )
+        return OverflowError(value=str(input.value))
 
     # Clamp to range
     clamped = max(input.min_value, min(input.max_value, input.value))
@@ -131,6 +134,7 @@ def validate_range(input: ValidateInput) -> ValidateOutput | Error:
     )
 
 
+@uostore_type()
 class ErrorInfoInput(BaseModel):
     """Input for error logging UO."""
 
@@ -139,6 +143,7 @@ class ErrorInfoInput(BaseModel):
     original_value: float = Field(default=0, description="The value that caused error")
 
 
+@uostore_type()
 class ErrorInfoOutput(BaseModel):
     """Output for error logging UO."""
 
@@ -147,18 +152,22 @@ class ErrorInfoOutput(BaseModel):
 
 
 @unit_operation(description="Log an error and provide fallback value")
-def log_error(input: ErrorInfoInput) -> ErrorInfoOutput | Error:
+def log_error(input: ErrorInfoInput) -> ErrorInfoOutput:
     """Log error info and return a safe fallback value."""
     print(f"[ERROR HANDLER] Code: {input.error_code}, Message: {input.error_message}")
     return ErrorInfoOutput(logged=True, fallback_value=0.0)
 
 
+@uostore_type()
 class EmergencyInput(BaseModel):
     """Input for emergency stop."""
 
-    reason: str = Field(default="Unknown", description="Reason for emergency stop")
+    error_code: str = Field(default="UNKNOWN", description="The error code")
+    error_message: str = Field(default="", description="The error message")
+    block_id: str = Field(default="", description="Block where the error occurred")
 
 
+@uostore_type()
 class EmergencyOutput(BaseModel):
     """Output for emergency stop."""
 
@@ -166,7 +175,10 @@ class EmergencyOutput(BaseModel):
 
 
 @unit_operation(description="Emergency stop - halt all operations")
-def emergency_stop(input: EmergencyInput) -> EmergencyOutput | Error:
+def emergency_stop(input: EmergencyInput) -> EmergencyOutput:
     """Emergency stop handler. Always succeeds."""
-    print(f"[EMERGENCY STOP] Reason: {input.reason}")
+    print(
+        f"[EMERGENCY STOP] Code: {input.error_code}, "
+        f"Message: {input.error_message}, Block: {input.block_id}"
+    )
     return EmergencyOutput(halted=True)

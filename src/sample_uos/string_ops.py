@@ -2,9 +2,10 @@
 
 from pydantic import BaseModel, Field
 
-from uostore import Error, unit_operation
+from uostore import unit_operation, uostore_type
 
 
+@uostore_type()
 class ConcatInput(BaseModel):
     """Input for string concatenation."""
 
@@ -12,6 +13,7 @@ class ConcatInput(BaseModel):
     b: str = Field(description="Second string")
 
 
+@uostore_type()
 class ConcatOutput(BaseModel):
     """Output for concatenation."""
 
@@ -19,17 +21,19 @@ class ConcatOutput(BaseModel):
 
 
 @unit_operation(description="Concatenate two strings")
-def concat(input: ConcatInput) -> ConcatOutput | Error:
+def concat(input: ConcatInput) -> ConcatOutput:
     """Concatenate two strings together."""
     return ConcatOutput(result=input.a + input.b)
 
 
+@uostore_type()
 class UppercaseInput(BaseModel):
     """Input for uppercase conversion."""
 
     text: str = Field(description="Text to convert")
 
 
+@uostore_type()
 class UppercaseOutput(BaseModel):
     """Output for uppercase conversion."""
 
@@ -37,6 +41,6 @@ class UppercaseOutput(BaseModel):
 
 
 @unit_operation(description="Convert text to uppercase")
-def uppercase(input: UppercaseInput) -> UppercaseOutput | Error:
+def uppercase(input: UppercaseInput) -> UppercaseOutput:
     """Convert text to uppercase."""
     return UppercaseOutput(result=input.text.upper())

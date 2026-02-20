@@ -20,7 +20,7 @@ class ResultFloat(BaseModel):
     result: float = Field(description="result")
 
 
-@unit_operation(description="Add two numbers together")
+@unit_operation(description="Add two numbers together", tags=["kind:computational"])
 def add(input: AddInput) -> ResultFloat:
     """Compute the sum of two numbers."""
     return ResultFloat(result=input.a + input.b)
@@ -34,7 +34,7 @@ class MultiplyInput(BaseModel):
     b: float = Field(description="Second number")
 
 
-@unit_operation(description="Multiply two numbers")
+@unit_operation(description="Multiply two numbers", tags=["kind:computational"])
 def multiply(input: MultiplyInput) -> ResultFloat:
     """Compute the product of two numbers."""
     return ResultFloat(result=input.a * input.b)
@@ -55,7 +55,7 @@ class DivisionByZeroError(BaseModel):
     pass
 
 
-@unit_operation(description="Divide two numbers")
+@unit_operation(description="Divide two numbers", tags=["kind:computational"])
 def divide(input: DivideInput) -> ResultFloat | DivisionByZeroError:
     """Divide numerator by denominator. Returns Error if denominator is zero."""
     if input.denominator == 0:
@@ -105,7 +105,10 @@ class OverflowError(BaseModel):
     value: str = Field(default="", description="The overflow value")
 
 
-@unit_operation(description="Validate and clamp a value to a range")
+@unit_operation(
+    description="Validate and clamp a value to a range",
+    tags=["kind:computational", "kind:validation"],
+)
 def validate_range(
     input: ValidateInput,
 ) -> ValidateOutput | InvalidInputError | RangeError | OverflowError:
@@ -151,7 +154,10 @@ class ErrorInfoOutput(BaseModel):
     fallback_value: float = Field(description="Fallback value to use")
 
 
-@unit_operation(description="Log an error and provide fallback value")
+@unit_operation(
+    description="Log an error and provide fallback value",
+    tags=["kind:utility"],
+)
 def log_error(input: ErrorInfoInput) -> ErrorInfoOutput:
     """Log error info and return a safe fallback value."""
     print(f"[ERROR HANDLER] Code: {input.error_code}, Message: {input.error_message}")
@@ -172,7 +178,9 @@ class EmergencyOutput(BaseModel):
     halted: bool = Field(description="System halted")
 
 
-@unit_operation(description="Emergency stop - halt all operations")
+@unit_operation(
+    description="Emergency stop - halt all operations", tags=["kind:utility"]
+)
 def emergency_stop(input: EmergencyInput) -> EmergencyOutput:
     """Emergency stop handler — performs safety actions.
 

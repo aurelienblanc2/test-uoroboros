@@ -54,7 +54,10 @@ class OverflowValueError(BaseModel):
     pass
 
 
-@unit_operation(description="Validate that value is positive")
+@unit_operation(
+    description="Validate that value is positive",
+    tags=["kind:computational", "kind:validation"],
+)
 def check_positive(
     input: ValueInput,
 ) -> ValueOutput | ZeroError | NegativeError | TooLargeError:
@@ -68,19 +71,19 @@ def check_positive(
     return ValueOutput(value=input.value)
 
 
-@unit_operation(description="Double the value")
+@unit_operation(description="Double the value", tags=["kind:computational"])
 def double_value(input: ValueInput) -> ValueOutput:
     """Multiply the value by 2."""
     return ValueOutput(value=input.value * 2)
 
 
-@unit_operation(description="Add 10 to the value")
+@unit_operation(description="Add 10 to the value", tags=["kind:computational"])
 def add_ten(input: ValueInput) -> ValueOutput:
     """Add 10 to the value."""
     return ValueOutput(value=input.value + 10)
 
 
-@unit_operation(description="Square the value")
+@unit_operation(description="Square the value", tags=["kind:computational"])
 def square_value(input: ValueInput) -> ValueOutput | OverflowValueError:
     """Square the value. Returns OVERFLOW if result > 1e6."""
     result = input.value**2
@@ -89,31 +92,34 @@ def square_value(input: ValueInput) -> ValueOutput | OverflowValueError:
     return ValueOutput(value=result)
 
 
-@unit_operation(description="Negate the value")
+@unit_operation(description="Negate the value", tags=["kind:computational"])
 def negate(input: ValueInput) -> ValueOutput:
     """Return the negative of the value."""
     return ValueOutput(value=-input.value)
 
 
-@unit_operation(description="Return absolute value")
+@unit_operation(description="Return absolute value", tags=["kind:computational"])
 def absolute(input: ValueInput) -> ValueOutput:
     """Return absolute value."""
     return ValueOutput(value=abs(input.value))
 
 
-@unit_operation(description="Identity - pass through unchanged")
+@unit_operation(description="Identity - pass through unchanged", tags=["kind:utility"])
 def identity(input: ValueInput) -> ValueOutput:
     """Pass the value through unchanged. Useful as recovery/terminal block."""
     return ValueOutput(value=input.value)
 
 
-@unit_operation(description="Set value to zero (recovery)")
+@unit_operation(description="Set value to zero (recovery)", tags=["kind:utility"])
 def zero_recovery(input: ValueInput) -> ValueOutput:
     """Recovery block that returns zero regardless of input."""
     return ValueOutput(value=0.0)
 
 
-@unit_operation(description="Set value to default -1 (error marker)")
+@unit_operation(
+    description="Set value to default -1 (error marker)",
+    tags=["kind:utility"],
+)
 def error_marker(input: ValueInput) -> ValueOutput:
     """Mark that an error occurred by returning -1."""
     return ValueOutput(value=-1.0)

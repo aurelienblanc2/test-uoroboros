@@ -189,3 +189,17 @@ def emergency_stop(input: EmergencyInput) -> EmergencyOutput:
     """
     print("[EMERGENCY STOP] Halting all operations")
     return EmergencyOutput(halted=True)
+
+
+@uostore_type()
+class EmptyType(BaseModel):
+    """Empty """
+
+    pass
+
+
+@unit_operation(description="print", tags=["kind:computational"])
+def print_dummy(input: EmptyType) -> EmptyType:
+    """Print Dummy"""
+    print("Hello, where do I appear ?")
+    return EmptyType()

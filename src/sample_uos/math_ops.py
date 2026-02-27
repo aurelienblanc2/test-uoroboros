@@ -52,14 +52,17 @@ class DivideInput(BaseModel):
 class DivisionByZeroError(BaseModel):
     """Error when dividing by zero."""
 
-    pass
+    numerator: float = Field(description="The numerator that was being divided")
+    denominator: float = Field(description="The denominator (zero)")
 
 
 @unit_operation(description="Divide two numbers", tags=["kind:computational"])
 def divide(input: DivideInput) -> ResultFloat | DivisionByZeroError:
     """Divide numerator by denominator. Returns Error if denominator is zero."""
     if input.denominator == 0:
-        return DivisionByZeroError()
+        return DivisionByZeroError(
+            numerator=input.numerator, denominator=input.denominator
+        )
     return ResultFloat(result=input.numerator / input.denominator)
 
 
@@ -94,15 +97,15 @@ class InvalidInputError(BaseModel):
 class RangeError(BaseModel):
     """Error for invalid range parameters."""
 
-    min: float = Field(default=0, description="Min value")
-    max: float = Field(default=0, description="Max value")
+    min: float = Field(description="Min value")
+    max: float = Field(description="Max value")
 
 
 @uostore_type(error_code="OVERFLOW", message="Value exceeds safe range")
 class OverflowError(BaseModel):
     """Error for overflow values."""
 
-    value: str = Field(default="", description="The overflow value")
+    value: float = Field(description="The overflow value")
 
 
 @unit_operation(
@@ -121,13 +124,13 @@ def validate_range(
 
     # Check for infinity (overflow)
     if math.isinf(input.value):
-        return OverflowError(value=str(input.value))
+        return OverflowError(value=input.value)
 
     if input.min_value > input.max_value:
         return RangeError(min=input.min_value, max=input.max_value)
 
     if abs(input.value) > 1e300:
-        return OverflowError(value=str(input.value))
+        return OverflowError(value=input.value)
 
     # Clamp to range
     clamped = max(input.min_value, min(input.max_value, input.value))

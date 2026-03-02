@@ -201,8 +201,15 @@ class EmptyType(BaseModel):
     pass
 
 
-@unit_operation(description="print", tags=["kind:computational"])
-def print_dummy(input: EmptyType) -> EmptyType:
-    """Print Dummy"""
-    print("Hello, where do I appear ?")
+@uostore_type()
+class MessageType(BaseModel):
+    """String for a message."""
+
+    message: str = Field(default="Default message", description="Message string")
+
+
+@unit_operation(description="Print a message to stdout", tags=["kind:utility"])
+def print_message(input: MessageType) -> EmptyType:
+    """Print a message to stdout."""
+    print(input.message)
     return EmptyType()

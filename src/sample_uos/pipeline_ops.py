@@ -26,28 +26,28 @@ class ValueOutput(BaseModel):
     value: float = Field(description="The processed value")
 
 
-@uostore_type(error_code="ZERO", message="Value is zero")
+@uostore_type(condition="error", code="ZERO", message="Value is zero")
 class ZeroError(BaseModel):
     """Error when value is zero."""
 
     pass
 
 
-@uostore_type(error_code="NEGATIVE", message="Value is negative")
+@uostore_type(condition="error", code="NEGATIVE", message="Value is negative")
 class NegativeError(BaseModel):
     """Error when value is negative."""
 
     pass
 
 
-@uostore_type(error_code="TOO_LARGE", message="Value exceeds 1000")
+@uostore_type(condition="error", code="TOO_LARGE", message="Value exceeds 1000")
 class TooLargeError(BaseModel):
     """Error when value exceeds 1000."""
 
     pass
 
 
-@uostore_type(error_code="OVERFLOW", message="Result exceeds 1e6")
+@uostore_type(condition="error", code="OVERFLOW", message="Result exceeds 1e6")
 class OverflowValueError(BaseModel):
     """Error when squared result exceeds 1e6."""
 

@@ -48,7 +48,7 @@ class DivideInput(BaseModel):
     denominator: float = Field(description="Number to divide by")
 
 
-@uostore_type(error_code="DIVISION_BY_ZERO", message="Cannot divide by zero")
+@uostore_type(condition="error", code="DIVISION_BY_ZERO", message="Cannot divide by zero")
 class DivisionByZeroError(BaseModel):
     """Error when dividing by zero."""
 
@@ -86,14 +86,14 @@ class ValidateOutput(BaseModel):
     is_clamped: bool = Field(description="Whether value was clamped to range")
 
 
-@uostore_type(error_code="INVALID_INPUT", message="Value must be a finite number")
+@uostore_type(condition="error", code="INVALID_INPUT", message="Value must be a finite number")
 class InvalidInputError(BaseModel):
     """Error for invalid input values."""
 
     received: str = Field(default="", description="The received value")
 
 
-@uostore_type(error_code="RANGE_ERROR", message="Range parameters are invalid")
+@uostore_type(condition="error", code="RANGE_ERROR", message="Range parameters are invalid")
 class RangeError(BaseModel):
     """Error for invalid range parameters."""
 
@@ -101,7 +101,7 @@ class RangeError(BaseModel):
     max: float = Field(description="Max value")
 
 
-@uostore_type(error_code="OVERFLOW", message="Value exceeds safe range")
+@uostore_type(condition="error", code="OVERFLOW", message="Value exceeds safe range")
 class OverflowError(BaseModel):
     """Error for overflow values."""
 

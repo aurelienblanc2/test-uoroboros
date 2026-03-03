@@ -9,45 +9,45 @@ This allows chaining: A -> B -> C -> D with data flowing through.
 
 from pydantic import BaseModel, Field
 
-from uostore import unit_operation, uostore_type
+from uoroboros import unit_operation, uoroboros_type
 
 
-@uostore_type()
+@uoroboros_type()
 class ValueInput(BaseModel):
     """Standard input for pipeline UOs."""
 
     value: float = Field(description="The value to process")
 
 
-@uostore_type()
+@uoroboros_type()
 class ValueOutput(BaseModel):
     """Standard output for pipeline UOs."""
 
     value: float = Field(description="The processed value")
 
 
-@uostore_type(condition="error", code="ZERO", message="Value is zero")
+@uoroboros_type(condition="error", code="ZERO", message="Value is zero")
 class ZeroError(BaseModel):
     """Error when value is zero."""
 
     pass
 
 
-@uostore_type(condition="error", code="NEGATIVE", message="Value is negative")
+@uoroboros_type(condition="error", code="NEGATIVE", message="Value is negative")
 class NegativeError(BaseModel):
     """Error when value is negative."""
 
     pass
 
 
-@uostore_type(condition="error", code="TOO_LARGE", message="Value exceeds 1000")
+@uoroboros_type(condition="error", code="TOO_LARGE", message="Value exceeds 1000")
 class TooLargeError(BaseModel):
     """Error when value exceeds 1000."""
 
     pass
 
 
-@uostore_type(condition="error", code="OVERFLOW", message="Result exceeds 1e6")
+@uoroboros_type(condition="error", code="OVERFLOW", message="Result exceeds 1e6")
 class OverflowValueError(BaseModel):
     """Error when squared result exceeds 1e6."""
 

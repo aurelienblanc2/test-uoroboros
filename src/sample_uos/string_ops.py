@@ -2,10 +2,10 @@
 
 from pydantic import BaseModel, Field
 
-from uostore import unit_operation, uostore_type
+from uoroboros import unit_operation, uoroboros_type
 
 
-@uostore_type()
+@uoroboros_type()
 class ConcatInput(BaseModel):
     """Input for string concatenation."""
 
@@ -13,7 +13,7 @@ class ConcatInput(BaseModel):
     b: str = Field(description="Second string")
 
 
-@uostore_type()
+@uoroboros_type()
 class ConcatOutput(BaseModel):
     """Output for concatenation."""
 
@@ -26,14 +26,14 @@ def concat(input: ConcatInput) -> ConcatOutput:
     return ConcatOutput(result=input.a + input.b)
 
 
-@uostore_type()
+@uoroboros_type()
 class UppercaseInput(BaseModel):
     """Input for uppercase conversion."""
 
     text: str = Field(description="Text to convert")
 
 
-@uostore_type()
+@uoroboros_type()
 class UppercaseOutput(BaseModel):
     """Output for uppercase conversion."""
 

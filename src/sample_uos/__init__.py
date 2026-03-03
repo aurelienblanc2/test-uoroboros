@@ -1,4 +1,4 @@
-"""Sample Unit Operations for testing uostore."""
+"""Sample Unit Operations for testing uoroboros."""
 
 from sample_uos.math_ops import (
     add,

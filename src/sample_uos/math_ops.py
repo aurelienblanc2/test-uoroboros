@@ -2,10 +2,10 @@
 
 from pydantic import BaseModel, Field
 
-from uostore import unit_operation, uostore_type
+from uoroboros import unit_operation, uoroboros_type
 
 
-@uostore_type()
+@uoroboros_type()
 class AddInput(BaseModel):
     """Input for addition."""
 
@@ -13,7 +13,7 @@ class AddInput(BaseModel):
     b: float = Field(description="Second number")
 
 
-@uostore_type()
+@uoroboros_type()
 class ResultFloat(BaseModel):
     """Single float"""
 
@@ -26,7 +26,7 @@ def add(input: AddInput) -> ResultFloat:
     return ResultFloat(result=input.a + input.b)
 
 
-@uostore_type()
+@uoroboros_type()
 class MultiplyInput(BaseModel):
     """Input for multiplication."""
 
@@ -40,7 +40,7 @@ def multiply(input: MultiplyInput) -> ResultFloat:
     return ResultFloat(result=input.a * input.b)
 
 
-@uostore_type()
+@uoroboros_type()
 class DivideInput(BaseModel):
     """Input for division."""
 
@@ -48,7 +48,7 @@ class DivideInput(BaseModel):
     denominator: float = Field(description="Number to divide by")
 
 
-@uostore_type(condition="error", code="DIVISION_BY_ZERO", message="Cannot divide by zero")
+@uoroboros_type(condition="error", code="DIVISION_BY_ZERO", message="Cannot divide by zero")
 class DivisionByZeroError(BaseModel):
     """Error when dividing by zero."""
 
@@ -69,7 +69,7 @@ def divide(input: DivideInput) -> ResultFloat | DivisionByZeroError:
 # === Advanced UOs for comprehensive error handling demonstration ===
 
 
-@uostore_type()
+@uoroboros_type()
 class ValidateInput(BaseModel):
     """Input for validation UO."""
 
@@ -78,7 +78,7 @@ class ValidateInput(BaseModel):
     max_value: float = Field(default=100, description="Maximum allowed value")
 
 
-@uostore_type()
+@uoroboros_type()
 class ValidateOutput(BaseModel):
     """Output for validation UO."""
 
@@ -86,14 +86,14 @@ class ValidateOutput(BaseModel):
     is_clamped: bool = Field(description="Whether value was clamped to range")
 
 
-@uostore_type(condition="error", code="INVALID_INPUT", message="Value must be a finite number")
+@uoroboros_type(condition="error", code="INVALID_INPUT", message="Value must be a finite number")
 class InvalidInputError(BaseModel):
     """Error for invalid input values."""
 
     received: str = Field(default="", description="The received value")
 
 
-@uostore_type(condition="error", code="RANGE_ERROR", message="Range parameters are invalid")
+@uoroboros_type(condition="error", code="RANGE_ERROR", message="Range parameters are invalid")
 class RangeError(BaseModel):
     """Error for invalid range parameters."""
 
@@ -101,7 +101,7 @@ class RangeError(BaseModel):
     max: float = Field(description="Max value")
 
 
-@uostore_type(condition="error", code="OVERFLOW", message="Value exceeds safe range")
+@uoroboros_type(condition="error", code="OVERFLOW", message="Value exceeds safe range")
 class OverflowError(BaseModel):
     """Error for overflow values."""
 
@@ -140,7 +140,7 @@ def validate_range(
     )
 
 
-@uostore_type()
+@uoroboros_type()
 class ErrorInfoInput(BaseModel):
     """Input for error logging UO."""
 
@@ -149,7 +149,7 @@ class ErrorInfoInput(BaseModel):
     original_value: float = Field(default=0, description="The value that caused error")
 
 
-@uostore_type()
+@uoroboros_type()
 class ErrorInfoOutput(BaseModel):
     """Output for error logging UO."""
 
@@ -167,14 +167,14 @@ def log_error(input: ErrorInfoInput) -> ErrorInfoOutput:
     return ErrorInfoOutput(logged=True, fallback_value=0.0)
 
 
-@uostore_type()
+@uoroboros_type()
 class EmergencyInput(BaseModel):
     """Input for emergency stop safety action."""
 
     pass
 
 
-@uostore_type()
+@uoroboros_type()
 class EmergencyOutput(BaseModel):
     """Output for emergency stop."""
 
@@ -194,14 +194,14 @@ def emergency_stop(input: EmergencyInput) -> EmergencyOutput:
     return EmergencyOutput(halted=True)
 
 
-@uostore_type()
+@uoroboros_type()
 class EmptyType(BaseModel):
     """Empty """
 
     pass
 
 
-@uostore_type()
+@uoroboros_type()
 class MessageType(BaseModel):
     """String for a message."""
 

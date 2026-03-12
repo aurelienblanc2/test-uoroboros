@@ -7,7 +7,9 @@ from sample_uos.math_ops import (
     log_error,
     multiply,
     validate_range,
-    print_message
+    print_message,
+    random_list,
+    sum_list
 )
 from sample_uos.string_ops import concat, uppercase
 
@@ -20,5 +22,7 @@ __all__ = [
     "emergency_stop",
     "concat",
     "uppercase",
-    "print_message"
+    "print_message",
+    "sum_list",
+    "random_list"
 ]

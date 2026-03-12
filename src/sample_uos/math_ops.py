@@ -213,3 +213,45 @@ def print_message(input: MessageType) -> EmptyType:
     """Print a message to stdout."""
     print(input.message)
     return EmptyType()
+
+
+@uoroboros_type()
+class SumListInput(BaseModel):
+    """Input for sum_list UO."""
+
+    values: list[float] = Field(description="List of numbers to sum")
+
+
+@unit_operation(description="Sum all elements of a list", tags=["kind:computational"])
+def sum_list(input: SumListInput) -> ResultFloat:
+    """Sum all elements of a list and return the total as a float."""
+    return ResultFloat(result=sum(input.values))
+
+
+@uoroboros_type()
+class RandomListInput(BaseModel):
+    """Input for random_list UO."""
+
+    min_value: float = Field(description="Minimum value (inclusive)")
+    max_value: float = Field(description="Maximum value (exclusive)")
+    count: int = Field(description="Number of elements to generate")
+
+
+@uoroboros_type()
+class RandomListOutput(BaseModel):
+    """Output for random_list UO."""
+
+    values: list[float] = Field(description="Generated random floats")
+
+
+@unit_operation(
+    description="Generate a list of random floats", tags=["kind:computational"]
+)
+def random_list(input: RandomListInput) -> RandomListOutput | RangeError:
+    """Generate a list of random floats between min and max."""
+    import random
+
+    if input.min_value >= input.max_value:
+        return RangeError(min=input.min_value, max=input.max_value)
+    values = [random.uniform(input.min_value, input.max_value) for _ in range(input.count)]
+    return RandomListOutput(values=values)

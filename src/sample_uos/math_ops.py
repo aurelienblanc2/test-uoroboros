@@ -255,3 +255,9 @@ def random_list(input: RandomListInput) -> RandomListOutput | RangeError:
         return RangeError(min=input.min_value, max=input.max_value)
     values = [random.uniform(input.min_value, input.max_value) for _ in range(input.count)]
     return RandomListOutput(values=values)
+
+
+@uoroboros_type(condition="input")
+class Entry2(BaseModel):
+    """Input for double_entries_test workflow."""
+    b_entry_2 : AddInput = Field(description="Second entry block input")

@@ -48,7 +48,9 @@ class DivideInput(BaseModel):
     denominator: float = Field(description="Number to divide by")
 
 
-@uoroboros_type(condition="error", code="DIVISION_BY_ZERO", message="Cannot divide by zero")
+@uoroboros_type(
+    condition="error", code="DIVISION_BY_ZERO", message="Cannot divide by zero"
+)
 class DivisionByZeroError(BaseModel):
     """Error when dividing by zero."""
 
@@ -86,14 +88,18 @@ class ValidateOutput(BaseModel):
     is_clamped: bool = Field(description="Whether value was clamped to range")
 
 
-@uoroboros_type(condition="error", code="INVALID_INPUT", message="Value must be a finite number")
+@uoroboros_type(
+    condition="error", code="INVALID_INPUT", message="Value must be a finite number"
+)
 class InvalidInputError(BaseModel):
     """Error for invalid input values."""
 
     received: str = Field(default="", description="The received value")
 
 
-@uoroboros_type(condition="error", code="RANGE_ERROR", message="Range parameters are invalid")
+@uoroboros_type(
+    condition="error", code="RANGE_ERROR", message="Range parameters are invalid"
+)
 class RangeError(BaseModel):
     """Error for invalid range parameters."""
 
@@ -196,7 +202,7 @@ def emergency_stop(input: EmergencyInput) -> EmergencyOutput:
 
 @uoroboros_type()
 class EmptyType(BaseModel):
-    """Empty """
+    """Empty"""
 
     pass
 
@@ -253,11 +259,14 @@ def random_list(input: RandomListInput) -> RandomListOutput | RangeError:
 
     if input.min_value >= input.max_value:
         return RangeError(min=input.min_value, max=input.max_value)
-    values = [random.uniform(input.min_value, input.max_value) for _ in range(input.count)]
+    values = [
+        random.uniform(input.min_value, input.max_value) for _ in range(input.count)
+    ]
     return RandomListOutput(values=values)
 
 
 @uoroboros_type(condition="input")
 class Entry2(BaseModel):
     """Input for double_entries_test workflow."""
-    b_entry_2 : AddInput = Field(description="Second entry block input")
+
+    b_entry_2: AddInput = Field(description="Second entry block input")

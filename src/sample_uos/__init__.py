@@ -6,10 +6,10 @@ from sample_uos.math_ops import (
     emergency_stop,
     log_error,
     multiply,
-    validate_range,
     print_message,
     random_list,
-    sum_list
+    sum_list,
+    validate_range,
 )
 from sample_uos.string_ops import concat, uppercase
 
@@ -24,5 +24,5 @@ __all__ = [
     "uppercase",
     "print_message",
     "sum_list",
-    "random_list"
+    "random_list",
 ]

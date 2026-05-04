@@ -265,8 +265,8 @@ def random_list(input: RandomListInput) -> RandomListOutput | RangeError:
     return RandomListOutput(values=values)
 
 
-@uoroboros_type(condition="input")
+@uoroboros_type()
 class Entry2(BaseModel):
     """Input for double_entries_test workflow."""
 
-    b_entry_2: AddInput = Field(description="Second entry block input")
+    entry_2: AddInput = Field(description="Second entry block input")

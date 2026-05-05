@@ -2,7 +2,7 @@
 
 from pydantic import BaseModel, Field
 
-from uoroboros import unit_operation, uoroboros_type
+from uoroboros import OutputCondition, unit_operation, uoroboros_type
 
 
 @uoroboros_type()
@@ -48,9 +48,7 @@ class DivideInput(BaseModel):
     denominator: float = Field(description="Number to divide by")
 
 
-@uoroboros_type(
-    condition="error", code="DIVISION_BY_ZERO", message="Cannot divide by zero"
-)
+@uoroboros_type()
 class DivisionByZeroError(BaseModel):
     """Error when dividing by zero."""
 
@@ -58,7 +56,17 @@ class DivisionByZeroError(BaseModel):
     denominator: float = Field(description="The denominator (zero)")
 
 
-@unit_operation(description="Divide two numbers", tags=["kind:computational"])
+@unit_operation(
+    description="Divide two numbers",
+    tags=["kind:computational"],
+    outputs={
+        DivisionByZeroError: OutputCondition(
+            condition="error",
+            condition_code="DIVISION_BY_ZERO",
+            condition_message="Cannot divide by zero",
+        ),
+    },
+)
 def divide(input: DivideInput) -> ResultFloat | DivisionByZeroError:
     """Divide numerator by denominator. Returns Error if denominator is zero."""
     if input.denominator == 0:
@@ -88,18 +96,14 @@ class ValidateOutput(BaseModel):
     is_clamped: bool = Field(description="Whether value was clamped to range")
 
 
-@uoroboros_type(
-    condition="error", code="INVALID_INPUT", message="Value must be a finite number"
-)
+@uoroboros_type()
 class InvalidInputError(BaseModel):
     """Error for invalid input values."""
 
     received: str = Field(default="", description="The received value")
 
 
-@uoroboros_type(
-    condition="error", code="RANGE_ERROR", message="Range parameters are invalid"
-)
+@uoroboros_type()
 class RangeError(BaseModel):
     """Error for invalid range parameters."""
 
@@ -107,7 +111,7 @@ class RangeError(BaseModel):
     max: float = Field(description="Max value")
 
 
-@uoroboros_type(condition="error", code="OVERFLOW", message="Value exceeds safe range")
+@uoroboros_type()
 class OverflowError(BaseModel):
     """Error for overflow values."""
 
@@ -117,6 +121,23 @@ class OverflowError(BaseModel):
 @unit_operation(
     description="Validate and clamp a value to a range",
     tags=["kind:computational", "kind:validation"],
+    outputs={
+        InvalidInputError: OutputCondition(
+            condition="error",
+            condition_code="INVALID_INPUT",
+            condition_message="Value must be a finite number",
+        ),
+        RangeError: OutputCondition(
+            condition="error",
+            condition_code="RANGE_ERROR",
+            condition_message="Range parameters are invalid",
+        ),
+        OverflowError: OutputCondition(
+            condition="error",
+            condition_code="OVERFLOW",
+            condition_message="Value exceeds safe range",
+        ),
+    },
 )
 def validate_range(
     input: ValidateInput,
@@ -251,7 +272,15 @@ class RandomListOutput(BaseModel):
 
 
 @unit_operation(
-    description="Generate a list of random floats", tags=["kind:computational"]
+    description="Generate a list of random floats",
+    tags=["kind:computational"],
+    outputs={
+        RangeError: OutputCondition(
+            condition="error",
+            condition_code="RANGE_ERROR",
+            condition_message="Range parameters are invalid",
+        ),
+    },
 )
 def random_list(input: RandomListInput) -> RandomListOutput | RangeError:
     """Generate a list of random floats between min and max."""

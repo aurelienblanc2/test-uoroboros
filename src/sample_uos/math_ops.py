@@ -296,6 +296,15 @@ def random_list(input: RandomListInput) -> RandomListOutput | RangeError:
 
 @uoroboros_type()
 class Entry2(BaseModel):
-    """Input for double_entries_test workflow."""
+    """Input for input_forms_demo workflow.
+
+    Wraps :class:`AddInput` under a single ``entry_2`` field so that
+    the ``input_forms_demo`` example can declare it as an *un-aliased*
+    type ref (``"sample_uos:Entry2"``) and still get a namespaced
+    ``input.entry_2.{a,b}`` shape — without forcing the flow author to
+    use the aliased form.  Demonstrates the "type carries its own
+    namespace key" pattern alongside the aliased form
+    (``"entry_3::sample_uos:AddInput"``) used by the other entries.
+    """
 
     entry_2: AddInput = Field(description="Second entry block input")

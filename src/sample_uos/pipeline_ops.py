@@ -9,7 +9,7 @@ This allows chaining: A -> B -> C -> D with data flowing through.
 
 from pydantic import BaseModel, Field
 
-from uoroboros import unit_operation, uoroboros_type
+from uoroboros import OutputCondition, unit_operation, uoroboros_type
 
 
 @uoroboros_type()
@@ -26,28 +26,28 @@ class ValueOutput(BaseModel):
     value: float = Field(description="The processed value")
 
 
-@uoroboros_type(condition="error", code="ZERO", message="Value is zero")
+@uoroboros_type()
 class ZeroError(BaseModel):
     """Error when value is zero."""
 
     pass
 
 
-@uoroboros_type(condition="error", code="NEGATIVE", message="Value is negative")
+@uoroboros_type()
 class NegativeError(BaseModel):
     """Error when value is negative."""
 
     pass
 
 
-@uoroboros_type(condition="error", code="TOO_LARGE", message="Value exceeds 1000")
+@uoroboros_type()
 class TooLargeError(BaseModel):
     """Error when value exceeds 1000."""
 
     pass
 
 
-@uoroboros_type(condition="error", code="OVERFLOW", message="Result exceeds 1e6")
+@uoroboros_type()
 class OverflowValueError(BaseModel):
     """Error when squared result exceeds 1e6."""
 
@@ -57,6 +57,23 @@ class OverflowValueError(BaseModel):
 @unit_operation(
     description="Validate that value is positive",
     tags=["kind:computational", "kind:validation"],
+    outputs={
+        ZeroError: OutputCondition(
+            condition="error",
+            condition_code="ZERO",
+            condition_message="Value is zero",
+        ),
+        NegativeError: OutputCondition(
+            condition="error",
+            condition_code="NEGATIVE",
+            condition_message="Value is negative",
+        ),
+        TooLargeError: OutputCondition(
+            condition="error",
+            condition_code="TOO_LARGE",
+            condition_message="Value exceeds 1000",
+        ),
+    },
 )
 def check_positive(
     input: ValueInput,
@@ -83,7 +100,17 @@ def add_ten(input: ValueInput) -> ValueOutput:
     return ValueOutput(value=input.value + 10)
 
 
-@unit_operation(description="Square the value", tags=["kind:computational"])
+@unit_operation(
+    description="Square the value",
+    tags=["kind:computational"],
+    outputs={
+        OverflowValueError: OutputCondition(
+            condition="error",
+            condition_code="OVERFLOW",
+            condition_message="Result exceeds 1e6",
+        ),
+    },
+)
 def square_value(input: ValueInput) -> ValueOutput | OverflowValueError:
     """Square the value. Returns OVERFLOW if result > 1e6."""
     result = input.value**2
